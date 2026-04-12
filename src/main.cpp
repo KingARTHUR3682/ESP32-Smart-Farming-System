@@ -31,9 +31,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Fixed sensors value
 const int tankEmptyValue = 0;
-const int tankFullValue = 2000;
-const int soilDryValue = 3500;
-const int soilWetValue = 1500;
+const int tankFullValue = 2500;
+const int soilDryValue = 3165;
+const int soilWetValue = 1050;
 
 // Output states
 bool fanState = false;
@@ -69,8 +69,9 @@ const char* mqtt_server = MQTT_BROKER_URL;
 const int mqtt_port = MQTT_BROKER_PORT;
 
 // MQTT Topics
-const char* topic_dht11_data = "sfs/node_1/dht11/data"; // Topic to send data to web server
-const char* topic_dht11_settings = "sfs/node_1/dht11/settings"; // Topic to get settings from web server
+const char* topic_sensors_data = "sfs/node_1/sensors/data"; // Topic to send data to web server
+const char* topic_sensors_settings = "sfs/node_1/sensors/settings"; // Topic to get settings from web server
+const char* topic_calibration = "sfs/node_1/calibration"; // Topic to find wet and dry value for sensor modules
 
 // Setting for wait time
 struct Timer {
@@ -173,7 +174,7 @@ boolean MQTTReconnect() {
   if (client.connect(clientId, MQTT_USER, MQTT_PASS)) { // Username and password for MQTT broker
     Serial.println(F("connected"));
     // Subscribe to the settings topic to receive updates
-    client.subscribe(topic_dht11_settings);
+    client.subscribe(topic_sensors_settings);
     return true;
   } else {
     Serial.print(F("failed, Return Code: ")); // Print return code
@@ -400,9 +401,88 @@ void loop() {
       char jsonBuffer[512]; // Space for JSON message
       serializeJson(doc, jsonBuffer); // Pack the message into line format
       
-      client.publish(topic_dht11_data, jsonBuffer); // Publish message to MQTT
+      client.publish(topic_sensors_data, jsonBuffer); // Publish message to MQTT
       Serial.print(F("Published Data: "));
       Serial.println(jsonBuffer); // Print the message in line format
     }
   }  
 }
+
+// void loop() {
+//   // Get current system runtime
+//   unsigned long currentMillis = millis();
+  
+//   // --- 1. Network Connection Check (Non-blocking) ---
+//   if (WiFi.status() != WL_CONNECTED) {
+//     if (currentMillis - wifiTimer.previous > wifiTimer.interval) {
+//       wifiTimer.previous = currentMillis;
+//       Serial.println(F("Wi-Fi lost. Reconnecting..."));
+//       WiFi.disconnect();
+//       WiFi.reconnect();
+//     }
+//   } else if (!client.connected()) {
+//     if (currentMillis - mqttTimer.previous > mqttTimer.interval) {
+//       mqttTimer.previous = currentMillis;
+//       MQTTReconnect();
+//     }
+//   } else {
+//     client.loop(); // Process incoming MQTT messages (callback)
+//   }
+  
+//   // --- 2. Sensor Readings & Logic Execution (Every 5 seconds) ---
+//   if(currentMillis - sensorTimer.previous >= sensorTimer.interval) {
+//     sensorTimer.previous = currentMillis;
+    
+//     // A. Read Raw values for calibration (Direct analog pin reading)
+//     int rawM = analogRead(SOILPIN);
+//     int rawWL = analogRead(LEVELPIN);
+
+//     // B. Read processed values for display and logic
+//     float h = dht.readHumidity();
+//     float t = dht.readTemperature();
+//     float m = getSoilMoisture();    // Uses your current map() values
+//     float l = gy302.readLightLevel();
+//     float wl = getWaterLevel();     // Uses your current map() values
+
+//     // C. Execute automation and safety logic
+//     if(isnan(h) || isnan(t)) {
+//       digitalWrite(FANPIN, HIGH);
+//       fanState = false;
+//     } else {
+//       fan(h, t);
+//     }
+//     waterPump(m, wl);
+//     growLight(l);
+
+//     // D. Update the physical OLED display
+//     updateDisplay(t, h, m, wl, l);
+
+//     // E. Send Data to MQTT
+//     if (client.connected()) {
+//       // --- Main Dashboard Data ---
+//       JsonDocument dataDoc;
+//       dataDoc["temperature"] = t;
+//       dataDoc["humidity"] = h;
+//       dataDoc["fan_status"] = fanState;
+//       dataDoc["moisture"] = m;
+//       dataDoc["water_pump_status"] = pumpState;
+//       dataDoc["light_lux"] = l;
+//       dataDoc["grow_light_state"] = lightState;
+//       dataDoc["tank_level"] = wl;
+//       dataDoc["tank_empty_alert"] = tankEmpty;
+
+//       char dataBuffer[512];
+//       serializeJson(dataDoc, dataBuffer);
+//       client.publish(topic_sensors_data, dataBuffer);
+
+//       // --- Calibration Data (Raw values for tuning) ---
+//       JsonDocument calDoc;
+//       calDoc["raw_soil"] = rawM;
+//       calDoc["raw_water"] = rawWL;
+      
+//       char calBuffer[128];
+//       serializeJson(calDoc, calBuffer);
+//       client.publish(topic_calibration, calBuffer);
+//     }
+//   }  
+// }
