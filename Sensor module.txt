@@ -1,0 +1,41 @@
+Sensor module
+- soil moisture monitoring 
+- sunlight monitoring 
+- Water Level Sensor 
+- Temperature & Humidity sensor
+
+Function
+- auto watering base on soil moisture 
+- open grow light if the instantaneous lux is not enough 
+- sensor the water tank and alert if the water level is low 
+- open a small fan if the temp is high to ensure the temp is suitable for the plant
+
+Dashboard
+- Manual and auto toggle button
+- Dynamic value set on web on temp, light and humidity
+
+Protocol & data format
+- Communication protocol: MQTT
+- Data format: JSON
+
+MQTT user information
+- Username: Esp32
+- Password: Esp32_32
+
+MQTT topic
+- topic_sensor_data    : sfs/node_1/sensors/data
+- topic_sensor_settings: sfs/node_1/sensors/settings
+- topic_calibration    : sfs/node_1/calibration
+
+Pins
+- DHT11 sensor			  : GPIO 4 (DHTPIN)
+- DC fan 5v			  : GPIO 25 (FANPIN) (Relay input 1)
+
+- Capacitive soil moisture sensor : GPIO 32 (SOILPIN)
+- Water pump			  : GPIO 26 (PUMPPIN) (Relay input 2)
+- Water level sensor		  : GPIO 33 (LEVELPIN)
+
+- GY302 light sensor		  : SDA GPIO 21, SCL GPIO 22 (LIGHTPIN)
+- Grow Light 5v			  : GPIO 27 (LIGHTPIN) (Relay input 3)
+
+- OLED SSD1306			  : SDA GPIO 21, SCL GPIO 22 
