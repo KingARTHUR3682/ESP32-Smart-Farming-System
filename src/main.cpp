@@ -43,6 +43,8 @@ bool tankEmpty = false;
 
 bool manualMode = false;
 
+unsigned long pumpStartTime = 0;
+const unsigned long pumpRunTimeLimit = 10000; // 10 second
 struct SensorSetting{
   float triggerOn;
   float space;
@@ -80,9 +82,10 @@ struct Timer {
   unsigned long interval;
 };
 
-Timer sensorTimer = {0, 5000};
+Timer sensorTimer = {0, 90000};
 Timer wifiTimer = {0, 10000};
 Timer mqttTimer = {0, 5000};
+Timer displayTimer = {0, 2000};
 
 // ---------------------------------------------------------------------------------------------------
 
@@ -225,6 +228,7 @@ void waterPump(float moisture, float tankLevel) {
     if(!pumpState && moisture <= moi.triggerOn) {
       digitalWrite(PUMPPIN, LOW); // Turn on water pump
       pumpState = true; // Update state
+      pumpStartTime = millis(); // Record water pump start time
       Serial.println(F("Water pump opened"));
 
     //Off logic
@@ -333,6 +337,23 @@ void setup() {
 void loop() {
   // Using millis rather than delay to ensure non-blocking on ESP32
   unsigned long currentMillis = millis();
+
+  if (pumpState && (currentMillis - pumpStartTime >= pumpRunTimeLimit)) {
+      digitalWrite(PUMPPIN, HIGH);
+      pumpState = false;
+      Serial.println(F("Safety Timeout: Pump stopped after 10 seconds."));
+  }
+
+  // Read every 2 second for display update
+  if (currentMillis - displayTimer.previous >= displayTimer.interval) {
+    displayTimer.previous = currentMillis;
+    float h = dht.readHumidity();
+    float t = dht.readTemperature();
+    float m = getSoilMoisture();
+    float l = gy302.readLightLevel();
+    float wl = getWaterLevel();
+    updateDisplay(t, h, m, wl, l);
+  }
   
   if (WiFi.status() != WL_CONNECTED) { // Check connect status for WiFi
     if (currentMillis - wifiTimer.previous > wifiTimer.interval) {
