@@ -61,7 +61,8 @@ float triggerTankEmpty = 15.0;
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASS;
 
-WiFiClientSecure espClient; // Assign WiFi connection worker
+// WiFiClientSecure espClient; // Assign WiFi connection worker
+WiFiClient espClient;
 PubSubClient client(espClient); // Assign MQTT worker and allow it to access WiFi
 
 // MQTT broker setting (Able to change url and port later)
@@ -324,7 +325,7 @@ void setup() {
   Serial.println(F(" Connected!"));
 
   // Setup MQTT
-  espClient.setInsecure(); // Encryption
+  // espClient.setInsecure(); // Encryption
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
 }
