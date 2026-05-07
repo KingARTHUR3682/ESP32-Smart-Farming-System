@@ -23,15 +23,17 @@
 
 #define LIGHTPIN 27
 
-#define LEVELPIN 33
+#define TRIGPIN 18
+#define ECHOPIN 19
 
 DHT dht(DHTPIN, DHTTYPE); // Assign dht sensor
 BH1750 gy302; // Assign light sensor
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Fixed sensors value
-const int tankEmptyValue = 0;
-const int tankFullValue = 2500;
+const float tankEmptyDistance = 16.0;
+const float tankFullDistance = 5.0;
+
 const int soilDryValue = 3165;
 const int soilWetValue = 1050;
 
@@ -90,10 +92,20 @@ Timer displayTimer = {0, 2000};
 // ---------------------------------------------------------------------------------------------------
 
 float getWaterLevel() {
-  int rawLevel = analogRead(LEVELPIN);
+  digitalWrite(TRIGPIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIGPIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIGPIN, LOW);
 
-  // Map and constrain the value
-  int levelPercent = map(rawLevel, tankEmptyValue, tankFullValue, 0, 100);
+  long duration = pulseIn(ECHOPIN, HIGH);
+  float distanceCm = duration * 0.034 / 2;
+
+  if (distanceCm == 0 || distanceCm > 400) {
+    return 0; 
+  }
+
+  int levelPercent = map(distanceCm, tankEmptyDistance, tankFullDistance, 0, 100);
   return constrain(levelPercent, 0, 100);
 }
 
@@ -292,6 +304,8 @@ void setup() {
   pinMode(FANPIN, OUTPUT);
   pinMode(PUMPPIN, OUTPUT);
   pinMode(LIGHTPIN, OUTPUT);
+  pinMode(TRIGPIN, OUTPUT);
+  pinMode(ECHOPIN, INPUT);
   digitalWrite(FANPIN, HIGH); //Active-low on relay module
   digitalWrite(PUMPPIN, HIGH);
   digitalWrite(LIGHTPIN, HIGH);
