@@ -28,15 +28,15 @@ MQTT topic
 - topic_calibration    : sfs/node_1/calibration
 
 Pins
-- DHT11 sensor			              : GPIO 4 (DHTPIN)
-- DC fan 5v			                  : GPIO 25 (FANPIN) (Relay input 1)
+- DHT11 sensor			          : GPIO 4 (DHTPIN)
+- DC fan 5v			              : GPIO 25 (FANPIN) (Relay input 1)
 
 - Capacitive soil moisture sensor : GPIO 32 (SOILPIN)
-- Water pump			                : GPIO 26 (PUMPPIN) (Relay input 2)
+- Water pump			          : GPIO 26 (PUMPPIN) (Relay input 2)
 - HC-SR04 Ultrasonic Trig         : GPIO 18 (TRIGPIN)
 - HC-SR04 Ultrasonic Echo         : GPIO 19 (ECHOPIN)
 
-- GY302 light sensor		          : SDA GPIO 21, SCL GPIO 22 (LIGHTPIN)
-- Grow Light 5v			              : GPIO 27 (LIGHTPIN) (Relay input 3)
+- GY302 light sensor		      : SDA GPIO 21, SCL GPIO 22 (LIGHTPIN)
+- Grow Light 5v			          : GPIO 27 (LIGHTPIN) (Relay input 3)
 
-- OLED SSD1306			              : SDA GPIO 21, SCL GPIO 22 
+- OLED SSD1306			          : SDA GPIO 21, SCL GPIO 22
