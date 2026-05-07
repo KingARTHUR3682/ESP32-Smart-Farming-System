@@ -1,14 +1,14 @@
 Sensor module
 - soil moisture monitoring 
 - sunlight monitoring 
-- Water Level Sensor 
+- Ultrasonic Water Level Sensor 
 - Temperature & Humidity sensor
 
 Function
-- auto watering base on soil moisture 
-- open grow light if the instantaneous lux is not enough 
-- sensor the water tank and alert if the water level is low 
-- open a small fan if the temp is high to ensure the temp is suitable for the plant
+- Auto watering based on soil moisture
+- Open grow light if the instantaneous lux is not enough 
+- Sensor the water tank and alert if the water level is low
+- Open a small fan if the temp is high to ensure the temp is suitable for the plant
 
 Dashboard
 - Manual and auto toggle button
@@ -28,14 +28,15 @@ MQTT topic
 - topic_calibration    : sfs/node_1/calibration
 
 Pins
-- DHT11 sensor			  : GPIO 4 (DHTPIN)
-- DC fan 5v			  : GPIO 25 (FANPIN) (Relay input 1)
+- DHT11 sensor			              : GPIO 4 (DHTPIN)
+- DC fan 5v			                  : GPIO 25 (FANPIN) (Relay input 1)
 
 - Capacitive soil moisture sensor : GPIO 32 (SOILPIN)
-- Water pump			  : GPIO 26 (PUMPPIN) (Relay input 2)
-- Water level sensor		  : GPIO 33 (LEVELPIN)
+- Water pump			                : GPIO 26 (PUMPPIN) (Relay input 2)
+- HC-SR04 Ultrasonic Trig         : GPIO 18 (TRIGPIN)
+- HC-SR04 Ultrasonic Echo         : GPIO 19 (ECHOPIN)
 
-- GY302 light sensor		  : SDA GPIO 21, SCL GPIO 22 (LIGHTPIN)
-- Grow Light 5v			  : GPIO 27 (LIGHTPIN) (Relay input 3)
+- GY302 light sensor		          : SDA GPIO 21, SCL GPIO 22 (LIGHTPIN)
+- Grow Light 5v			              : GPIO 27 (LIGHTPIN) (Relay input 3)
 
-- OLED SSD1306			  : SDA GPIO 21, SCL GPIO 22 
+- OLED SSD1306			              : SDA GPIO 21, SCL GPIO 22 
