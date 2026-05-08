@@ -34,6 +34,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 const float tankEmptyDistance = 16.0;
 const float tankFullDistance = 5.0;
 
+float lastValidWaterLevel = 100.0;
+
 const int soilDryValue = 3165;
 const int soilWetValue = 1050;
 
@@ -84,7 +86,7 @@ struct Timer {
   unsigned long interval;
 };
 
-Timer sensorTimer = {0, 90000};
+Timer sensorTimer = {0, 30000};
 Timer wifiTimer = {0, 10000};
 Timer mqttTimer = {0, 5000};
 Timer displayTimer = {0, 2000};
@@ -98,15 +100,22 @@ float getWaterLevel() {
   delayMicroseconds(10);
   digitalWrite(TRIGPIN, LOW);
 
-  long duration = pulseIn(ECHOPIN, HIGH);
+  long duration = pulseIn(ECHOPIN, HIGH, 30000);
+
+  if (duration == 0) {
+    return lastValidWaterLevel;
+  }
+
   float distanceCm = duration * 0.034 / 2;
 
-  if (distanceCm == 0 || distanceCm > 400) {
-    return 0; 
+  if (distanceCm > 400) {
+    return lastValidWaterLevel; 
   }
 
   int levelPercent = map(distanceCm, tankEmptyDistance, tankFullDistance, 0, 100);
-  return constrain(levelPercent, 0, 100);
+  lastValidWaterLevel = constrain(levelPercent, 0, 100);
+
+  return lastValidWaterLevel;
 }
 
 float getSoilMoisture() {
@@ -270,6 +279,9 @@ void growLight(float light) {
 
 void updateDisplay(float t, float h, float m, float wl, float l) {
   display.clearDisplay(); // Wipe the screen clean before drawing
+  display.ssd1306_command(0xD3);
+  display.ssd1306_command(0x00);
+  display.ssd1306_command(0x40);
   display.setTextSize(1); // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE); // Draw white text
 
