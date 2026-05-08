@@ -343,7 +343,6 @@ void setup() {
   Serial.println(F(" Connected!"));
 
   // Setup MQTT
-  // espClient.setInsecure(); // Encryption
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
 }
@@ -352,10 +351,16 @@ void loop() {
   // Using millis rather than delay to ensure non-blocking on ESP32
   unsigned long currentMillis = millis();
 
-  if (pumpState && (currentMillis - pumpStartTime >= pumpRunTimeLimit)) {
+
+  if (manualMode == false) {
+    sensorTimer.interval = 90000;
+    if (pumpState && (currentMillis - pumpStartTime >= pumpRunTimeLimit)) {
       digitalWrite(PUMPPIN, HIGH);
       pumpState = false;
       Serial.println(F("Safety Timeout: Pump stopped after 10 seconds."));
+    }
+  } else {
+    sensorTimer.interval = 5000; // Sensor timer set to 5s in manual mode
   }
 
   // Read every 2 second for display update
