@@ -401,13 +401,14 @@ void loop() {
     float l = gy302.readLightLevel();
     float wl = getWaterLevel();
 
-
     if(isnan(h) || isnan(t)) {
-      Serial.println(F("Failed to read from DHT sensor! Fan logic skipped."));
-      digitalWrite(FANPIN, HIGH);
-      fanState = false;
+      Serial.println(F("Failed to read from DHT sensor! Auto Fan logic skipped."));
+      if (manualMode == false) { 
+        digitalWrite(FANPIN, HIGH);
+        fanState = false;
+      }
     } else {
-      fan(h, t);
+      fan(h, t); 
     }
 
     waterPump(m, wl);
