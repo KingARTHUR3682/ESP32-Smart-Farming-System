@@ -415,6 +415,8 @@ void loop() {
 
     if(isnan(h) || isnan(t)) {
       Serial.println(F("Failed to read from DHT sensor! Auto Fan logic skipped."));
+      // Only in Auto Mode will a sensor error force the fan to shut down.
+      // If in Manual Mode, sensor errors are not allowed to interfere with the fan status.
       if (manualMode == false) { 
         digitalWrite(FANPIN, HIGH);
         fanState = false;
