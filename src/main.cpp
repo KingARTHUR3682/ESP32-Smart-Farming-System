@@ -67,8 +67,8 @@ float triggerTankEmpty = 15.0;
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASS;
 
-// WiFiClientSecure espClient; // Assign WiFi connection worker
-WiFiClient espClient;
+WiFiClientSecure espClient; // Assign WiFi connection worker
+// WiFiClient espClient;
 PubSubClient client(espClient); // Assign MQTT worker and allow it to access WiFi
 
 // MQTT broker setting (Able to change url and port later)
@@ -354,8 +354,11 @@ void setup() {
   }
   Serial.println(F(" Connected!"));
 
+  espClient.setInsecure();
+
   // Setup MQTT
   client.setServer(mqtt_server, mqtt_port);
+  client.setBufferSize(512);
   client.setCallback(callback);
 }
 
@@ -365,7 +368,7 @@ void loop() {
 
 
   if (manualMode == false) {
-    sensorTimer.interval = 90000;
+    sensorTimer.interval = 10000;
     if (pumpState && (currentMillis - pumpStartTime >= pumpRunTimeLimit)) {
       digitalWrite(PUMPPIN, HIGH);
       pumpState = false;
@@ -463,82 +466,3 @@ void loop() {
     }
   }  
 }
-
-// void loop() {
-//   // Get current system runtime
-//   unsigned long currentMillis = millis();
-  
-//   // --- 1. Network Connection Check (Non-blocking) ---
-//   if (WiFi.status() != WL_CONNECTED) {
-//     if (currentMillis - wifiTimer.previous > wifiTimer.interval) {
-//       wifiTimer.previous = currentMillis;
-//       Serial.println(F("Wi-Fi lost. Reconnecting..."));
-//       WiFi.disconnect();
-//       WiFi.reconnect();
-//     }
-//   } else if (!client.connected()) {
-//     if (currentMillis - mqttTimer.previous > mqttTimer.interval) {
-//       mqttTimer.previous = currentMillis;
-//       MQTTReconnect();
-//     }
-//   } else {
-//     client.loop(); // Process incoming MQTT messages (callback)
-//   }
-  
-//   // --- 2. Sensor Readings & Logic Execution (Every 5 seconds) ---
-//   if(currentMillis - sensorTimer.previous >= sensorTimer.interval) {
-//     sensorTimer.previous = currentMillis;
-    
-//     // A. Read Raw values for calibration (Direct analog pin reading)
-//     int rawM = analogRead(SOILPIN);
-//     int rawWL = analogRead(LEVELPIN);
-
-//     // B. Read processed values for display and logic
-//     float h = dht.readHumidity();
-//     float t = dht.readTemperature();
-//     float m = getSoilMoisture();    // Uses your current map() values
-//     float l = gy302.readLightLevel();
-//     float wl = getWaterLevel();     // Uses your current map() values
-
-//     // C. Execute automation and safety logic
-//     if(isnan(h) || isnan(t)) {
-//       digitalWrite(FANPIN, HIGH);
-//       fanState = false;
-//     } else {
-//       fan(h, t);
-//     }
-//     waterPump(m, wl);
-//     growLight(l);
-
-//     // D. Update the physical OLED display
-//     updateDisplay(t, h, m, wl, l);
-
-//     // E. Send Data to MQTT
-//     if (client.connected()) {
-//       // --- Main Dashboard Data ---
-//       JsonDocument dataDoc;
-//       dataDoc["temperature"] = t;
-//       dataDoc["humidity"] = h;
-//       dataDoc["fan_status"] = fanState;
-//       dataDoc["moisture"] = m;
-//       dataDoc["water_pump_status"] = pumpState;
-//       dataDoc["light_lux"] = l;
-//       dataDoc["grow_light_state"] = lightState;
-//       dataDoc["tank_level"] = wl;
-//       dataDoc["tank_empty_alert"] = tankEmpty;
-
-//       char dataBuffer[512];
-//       serializeJson(dataDoc, dataBuffer);
-//       client.publish(topic_sensors_data, dataBuffer);
-
-//       // --- Calibration Data (Raw values for tuning) ---
-//       JsonDocument calDoc;
-//       calDoc["raw_soil"] = rawM;
-//       calDoc["raw_water"] = rawWL;
-      
-//       char calBuffer[128];
-//       serializeJson(calDoc, calBuffer);
-//       client.publish(topic_calibration, calBuffer);
-//     }
-//   }  
-// }
