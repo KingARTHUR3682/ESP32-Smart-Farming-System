@@ -25,7 +25,7 @@ MQTT user information
 MQTT topic
 - topic_sensor_data    : sfs/node_1/sensors/data
 - topic_sensor_settings: sfs/node_1/sensors/settings
-- topic_calibration    : sfs/node_1/calibration
+- topic_setting_status : sfs/node_1/sensors/status
 
 Pins
 - DHT11 sensor			          : GPIO 4 (DHTPIN)

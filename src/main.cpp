@@ -78,7 +78,7 @@ const int mqtt_port = MQTT_BROKER_PORT;
 // MQTT Topics
 const char* topic_sensors_data = "sfs/node_1/sensors/data"; // Topic to send data to web server
 const char* topic_sensors_settings = "sfs/node_1/sensors/settings"; // Topic to get settings from web server
-const char* topic_calibration = "sfs/node_1/calibration"; // Topic to find wet and dry value for sensor modules
+const char* topic_settings_status = "sfs/node_1/sensors/status"; // Topic to send currenty setting value and status
 
 // Setting for wait time
 struct Timer {
@@ -462,6 +462,34 @@ void loop() {
       
       client.publish(topic_sensors_data, jsonBuffer); // Publish message to MQTT
       Serial.print(F("Published Data: "));
+      Serial.println(jsonBuffer); // Print the message in line format
+    }
+
+    if (client.connected()) {
+      JsonDocument doc; // Assign memory space for JSON named doc
+      // Assign value into JSON variable
+      doc["manual_mode"] = manualMode;
+
+      
+      doc["temp_on"] = temp.triggerOn;
+      doc["temp_space"] = temp.space;
+      doc["hum_on"] = hum.triggerOn;
+      doc["hum_space"] = hum.space;
+      doc["moi_on"] = moi.triggerOn;
+      doc["moi_space"] = moi.space;
+      doc["light_on"] = lux.triggerOn;
+      doc["light_space"] = lux.space;
+
+      
+      doc["manual_fan"] = fanState;
+      doc["manual_pump"] = pumpState;
+      doc["manual_light"] = lightState;
+
+      char jsonBuffer[512]; // Space for JSON message
+      serializeJson(doc, jsonBuffer); // Pack the message into line format
+      
+      client.publish(topic_settings_status, jsonBuffer); // Publish message to MQTT
+      Serial.print(F("Published Setting Status: "));
       Serial.println(jsonBuffer); // Print the message in line format
     }
   }  
