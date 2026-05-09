@@ -126,6 +126,34 @@ float getSoilMoisture() {
   return constrain(moisturePercent, 0, 100);
 }
 
+void sendSettingsStatus() {
+  JsonDocument doc; // Assign memory space for JSON named doc
+  // Assign value into JSON variable
+  doc["manual_mode"] = manualMode;
+
+  
+  doc["temp_on"] = temp.triggerOn;
+  doc["temp_space"] = temp.space;
+  doc["hum_on"] = hum.triggerOn;
+  doc["hum_space"] = hum.space;
+  doc["moi_on"] = moi.triggerOn;
+  doc["moi_space"] = moi.space;
+  doc["light_on"] = lux.triggerOn;
+  doc["light_space"] = lux.space;
+
+  
+  doc["manual_fan"] = fanState;
+  doc["manual_pump"] = pumpState;
+  doc["manual_light"] = lightState;
+
+  char jsonBuffer[512]; // Space for JSON message
+  serializeJson(doc, jsonBuffer); // Pack the message into line format
+  
+  client.publish(topic_settings_status, jsonBuffer); // Publish message to MQTT
+  Serial.print(F("Published Setting Status: "));
+  Serial.println(jsonBuffer); // Print the message in line format
+}
+
 // Function to turn payload to string message from web server and update the dynamic variables
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(F("\n--- New Settings Received ---")); 
@@ -185,6 +213,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
 
   Serial.println(F("Variables updated successfully!"));
+
+  sendSettingsStatus();
 }
 
 // Non-blocking MQTT Reconnect
@@ -200,6 +230,8 @@ boolean MQTTReconnect() {
     Serial.println(F("connected"));
     // Subscribe to the settings topic to receive updates
     client.subscribe(topic_sensors_settings);
+
+    sendSettingsStatus();
     return true;
   } else {
     Serial.print(F("failed, Return Code: ")); // Print return code
@@ -462,34 +494,6 @@ void loop() {
       
       client.publish(topic_sensors_data, jsonBuffer); // Publish message to MQTT
       Serial.print(F("Published Data: "));
-      Serial.println(jsonBuffer); // Print the message in line format
-    }
-
-    if (client.connected()) {
-      JsonDocument doc; // Assign memory space for JSON named doc
-      // Assign value into JSON variable
-      doc["manual_mode"] = manualMode;
-
-      
-      doc["temp_on"] = temp.triggerOn;
-      doc["temp_space"] = temp.space;
-      doc["hum_on"] = hum.triggerOn;
-      doc["hum_space"] = hum.space;
-      doc["moi_on"] = moi.triggerOn;
-      doc["moi_space"] = moi.space;
-      doc["light_on"] = lux.triggerOn;
-      doc["light_space"] = lux.space;
-
-      
-      doc["manual_fan"] = fanState;
-      doc["manual_pump"] = pumpState;
-      doc["manual_light"] = lightState;
-
-      char jsonBuffer[512]; // Space for JSON message
-      serializeJson(doc, jsonBuffer); // Pack the message into line format
-      
-      client.publish(topic_settings_status, jsonBuffer); // Publish message to MQTT
-      Serial.print(F("Published Setting Status: "));
       Serial.println(jsonBuffer); // Print the message in line format
     }
   }  
