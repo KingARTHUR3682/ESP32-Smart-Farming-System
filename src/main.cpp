@@ -48,7 +48,7 @@ bool tankEmpty = false;
 bool manualMode = false;
 
 unsigned long pumpStartTime = 0;
-const unsigned long pumpRunTimeLimit = 10000; // 10 second
+const unsigned long pumpRunTimeLimit = 3000; // 3 second
 struct SensorSetting{
   float triggerOn;
   float space;
@@ -404,7 +404,7 @@ void loop() {
     if (pumpState && (currentMillis - pumpStartTime >= pumpRunTimeLimit)) {
       digitalWrite(PUMPPIN, HIGH);
       pumpState = false;
-      Serial.println(F("Safety Timeout: Pump stopped after 10 seconds."));
+      Serial.println(F("Safety Timeout: Pump stopped after 3 seconds."));
     }
   } else {
     sensorTimer.interval = 5000; // Sensor timer set to 5s in manual mode
