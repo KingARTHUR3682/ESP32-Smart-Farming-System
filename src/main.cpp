@@ -4,6 +4,7 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <WiFiClientSecure.h>
+#include <WiFiManager.h>
 #include <Wire.h>
 #include <BH1750.h>
 #include <Adafruit_GFX.h>
@@ -64,8 +65,8 @@ float triggerTankEmpty = 15.0;
 
 
 // WiFi settings
-const char* ssid = WIFI_SSID;
-const char* password = WIFI_PASS;
+// const char* ssid = WIFI_SSID;
+// const char* password = WIFI_PASS;
 
 WiFiClientSecure espClient; // Assign WiFi connection worker
 // WiFiClient espClient;
@@ -378,13 +379,52 @@ void setup() {
   }
 
   // Connect to Wi-Fi
-  Serial.print(F("Connecting to WiFi..."));
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(F("."));
+  // Serial.print(F("Connecting to WiFi..."));
+  // WiFi.begin(ssid, password);
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(500);
+  //   Serial.print(F("."));
+  // }
+  // Serial.println(F(" Connected!"));
+
+  // --- DYNAMIC CAPTIVE PORTAL SETUP ---
+  // 1. Update the OLED to tell the user what to do if it fails to auto-connect
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 5);
+  display.println(F("Connecting WiFi..."));
+  display.println(F("If fails, connect"));
+  display.println(F("phone to AP:"));
+  display.setTextSize(2);
+  display.setCursor(0, 40);
+  display.println(F("SFS-Setup"));
+  display.display();
+
+  // 2. Initialize WiFiManager
+  WiFiManager wm;
+  
+  // 3. Set a 3-minute timeout so the ESP32 doesn't freeze forever if no one connects
+  wm.setConfigPortalTimeout(180); 
+
+  // 4. Attempt to connect. If it fails, start the "SFS-Setup" hotspot.
+  if (!wm.autoConnect("SFS-Setup")) {
+    Serial.println(F("Portal timed out or connection failed. Resetting..."));
+    delay(3000);
+    ESP.restart(); // Restart and try again
   }
-  Serial.println(F(" Connected!"));
+
+  // 5. If the code reaches here, Wi-Fi is successfully connected!
+  Serial.println(F("WiFi Connected successfully!"));
+  
+  // 6. Show the successful connection on the OLED
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 15);
+  display.println(F("WiFi Connected!"));
+  display.print(F("IP: "));
+  display.println(WiFi.localIP());
+  display.display();
+  delay(2000); // Pause for 2 seconds so the user can read it
 
   espClient.setInsecure();
 
