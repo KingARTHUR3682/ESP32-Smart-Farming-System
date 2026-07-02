@@ -27,6 +27,8 @@
 #define TRIGPIN 18
 #define ECHOPIN 19
 
+#define DEVICENUM 1
+
 DHT dht(DHTPIN, DHTTYPE); // Assign dht sensor
 BH1750 gy302; // Assign light sensor
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -141,6 +143,7 @@ void sendSettingsStatus() {
   doc["moi_space"] = moi.space;
   doc["light_on"] = lux.triggerOn;
   doc["light_space"] = lux.space;
+  doc["device_num"] = DEVICENUM;
 
   
   doc["manual_fan"] = fanState;
@@ -519,6 +522,8 @@ void loop() {
     if (client.connected()) {
       JsonDocument doc; // Assign memory space for JSON named doc
       // Assign value into JSON variable
+      doc["device_num"] = DEVICENUM;
+      
       doc["temperature"] = t;
       doc["humidity"] = h;
       doc["fan_status"] = fanState;
